@@ -20,11 +20,11 @@ jobs:
 
       - name: Build image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/hrm-app:latest .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/tt-app:latest .
 
       - name: Push image
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/hrm-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/tt-app:latest
 
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
@@ -33,11 +33,11 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/hrm-app:latest
-            docker stop hrm-app || true
-            docker rm hrm-app || true
+            docker pull ${{ secrets.DOCKER_USERNAME }}/tt-app:latest
+            docker stop tt-app || true
+            docker rm tt-app || true
             docker run -d -p 3000:3000 \
-              --name hrm-app \
+              --name tt-app \
               --restart always \
               --env-file /home/${{ secrets.SERVER_USER }}/app/.env \
-              ${{ secrets.DOCKER_USERNAME }}/hrm-app:latest
+              ${{ secrets.DOCKER_USERNAME }}/tt-app:latest
