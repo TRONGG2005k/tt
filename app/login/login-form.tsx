@@ -8,7 +8,7 @@ type ApiResult =
 
 const AUTH_LOGIN_URL = `/api/v1/auth/login`;
 const AUTH_REFRESH_URL = `/api/v1/auth/refresh`;
-const GOOGLE_CONNECT_URL = `/api/v1/google/connect`;
+const GOOGLE_CONNECT_URL = `/api/v1/auth/google/connect`;
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
