@@ -13,7 +13,7 @@ COPY package*.json ./
 RUN npm ci
 # Copy source code
 COPY . .
-RUN npx prisma generate
+
 
 # Build the application (output: standalone mode)
 RUN npm run build
