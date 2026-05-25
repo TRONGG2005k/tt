@@ -2,15 +2,13 @@
 
 import { useMemo, useState } from "react";
 
-import { TT_API_BASE_URL } from "@/app/lib/tt-api";
-
 type ApiResult =
   | { ok: true; data: unknown }
   | { ok: false; status: number; data: unknown };
 
-const AUTH_LOGIN_URL = `${TT_API_BASE_URL}/api/v1/auth/login`;
-const AUTH_REFRESH_URL = `${TT_API_BASE_URL}/api/v1/auth/refresh`;
-const GOOGLE_CONNECT_URL = `${TT_API_BASE_URL}/api/v1/google/connect`;
+const AUTH_LOGIN_URL = `/api/v1/auth/login`;
+const AUTH_REFRESH_URL = `/api/v1/auth/refresh`;
+const GOOGLE_CONNECT_URL = `/api/v1/google/connect`;
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -54,7 +52,11 @@ export default function LoginForm() {
         setLoginResult({ ok: false, status: res.status, data });
       }
     } catch {
-      setLoginResult({ ok: false, status: 0, data: { error: "NETWORK_ERROR" } });
+      setLoginResult({
+        ok: false,
+        status: 0,
+        data: { error: "NETWORK_ERROR" },
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -195,4 +197,3 @@ export default function LoginForm() {
     </div>
   );
 }
-
