@@ -2,14 +2,12 @@
 
 import { useMemo, useState } from "react";
 
-import { TT_API_BASE_URL } from "@/app/lib/tt-api";
-
 type LoginResponse =
   | { ok: true; data: unknown }
   | { ok: false; status: number; data: unknown };
 
-const AUTH_LOGIN_URL = `${TT_API_BASE_URL}/api/v1/auth/login`;
-const AUTH_REFRESH_URL = `${TT_API_BASE_URL}/api/v1/auth/refresh`;
+const AUTH_LOGIN_URL = `/api/v1/auth/login`;
+const AUTH_REFRESH_URL = `/api/v1/auth/refresh`;
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -18,7 +16,9 @@ export default function LoginForm() {
   const [result, setResult] = useState<LoginResponse | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshResult, setRefreshResult] = useState<LoginResponse | null>(null);
+  const [refreshResult, setRefreshResult] = useState<LoginResponse | null>(
+    null,
+  );
 
   const canSubmit = useMemo(() => {
     return email.trim().length > 0 && password.length > 0 && !isSubmitting;
@@ -35,7 +35,10 @@ export default function LoginForm() {
     try {
       const res = await fetch(AUTH_LOGIN_URL, {
         method: "POST",
-        headers: { "content-type": "application/json", accept: "application/json" },
+        headers: {
+          "content-type": "application/json",
+          accept: "application/json",
+        },
         body: JSON.stringify({ email, password }),
         credentials: "include",
       });
@@ -70,7 +73,11 @@ export default function LoginForm() {
       if (res.ok) setRefreshResult({ ok: true, data });
       else setRefreshResult({ ok: false, status: res.status, data });
     } catch {
-      setRefreshResult({ ok: false, status: 0, data: { error: "NETWORK_ERROR" } });
+      setRefreshResult({
+        ok: false,
+        status: 0,
+        data: { error: "NETWORK_ERROR" },
+      });
     } finally {
       setIsRefreshing(false);
     }
