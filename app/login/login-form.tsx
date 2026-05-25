@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { TT_API_BASE_URL } from "@/app/lib/tt-api";
 
@@ -10,14 +9,16 @@ type LoginResponse =
   | { ok: false; status: number; data: unknown };
 
 const AUTH_LOGIN_URL = `${TT_API_BASE_URL}/api/v1/auth/login`;
+const AUTH_REFRESH_URL = `${TT_API_BASE_URL}/api/v1/auth/refresh`;
 
 export default function LoginForm() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<LoginResponse | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshResult, setRefreshResult] = useState<LoginResponse | null>(null);
 
   const canSubmit = useMemo(() => {
     return email.trim().length > 0 && password.length > 0 && !isSubmitting;
@@ -30,6 +31,7 @@ export default function LoginForm() {
     setIsSubmitting(true);
     setResult(null);
     setIsLoggedIn(false);
+    setRefreshResult(null);
     try {
       const res = await fetch(AUTH_LOGIN_URL, {
         method: "POST",
@@ -50,6 +52,27 @@ export default function LoginForm() {
       setResult({ ok: false, status: 0, data: { error: "NETWORK_ERROR" } });
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function onRefresh() {
+    if (!isLoggedIn || isRefreshing) return;
+    setIsRefreshing(true);
+    setRefreshResult(null);
+    try {
+      const res = await fetch(AUTH_REFRESH_URL, {
+        method: "POST",
+        headers: { accept: "application/json" },
+        credentials: "include",
+      });
+
+      const data: unknown = await res.json().catch(() => null);
+      if (res.ok) setRefreshResult({ ok: true, data });
+      else setRefreshResult({ ok: false, status: res.status, data });
+    } catch {
+      setRefreshResult({ ok: false, status: 0, data: { error: "NETWORK_ERROR" } });
+    } finally {
+      setIsRefreshing(false);
     }
   }
 
@@ -117,10 +140,11 @@ export default function LoginForm() {
       {isLoggedIn ? (
         <button
           type="button"
-          onClick={() => router.push("/user")}
+          onClick={onRefresh}
+          disabled={isRefreshing}
           className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-black dark:text-zinc-100 dark:hover:bg-zinc-950"
         >
-          Xem thông tin người dùng
+          {isRefreshing ? "Đang refresh..." : "Refresh token"}
         </button>
       ) : null}
 
@@ -131,6 +155,19 @@ export default function LoginForm() {
           </div>
           <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-words">
             {JSON.stringify(result.data, null, 2)}
+          </pre>
+        </div>
+      ) : null}
+
+      {refreshResult ? (
+        <div className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200">
+          <div className="mb-2 font-medium">
+            {refreshResult.ok
+              ? "Refresh thành công"
+              : `Refresh thất bại (HTTP ${refreshResult.status})`}
+          </div>
+          <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-words">
+            {JSON.stringify(refreshResult.data, null, 2)}
           </pre>
         </div>
       ) : null}
