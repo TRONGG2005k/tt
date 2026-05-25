@@ -2,23 +2,26 @@
 
 import { useMemo, useState } from "react";
 
-type LoginResponse =
+import { TT_API_BASE_URL } from "@/app/lib/tt-api";
+
+type ApiResult =
   | { ok: true; data: unknown }
   | { ok: false; status: number; data: unknown };
 
-const AUTH_LOGIN_URL = `/api/v1/auth/login`;
-const AUTH_REFRESH_URL = `/api/v1/auth/refresh`;
+const AUTH_LOGIN_URL = `${TT_API_BASE_URL}/api/v1/auth/login`;
+const AUTH_REFRESH_URL = `${TT_API_BASE_URL}/api/v1/auth/refresh`;
+const GOOGLE_CONNECT_URL = `${TT_API_BASE_URL}/api/v1/google/connect`;
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<LoginResponse | null>(null);
+  const [loginResult, setLoginResult] = useState<ApiResult | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshResult, setRefreshResult] = useState<LoginResponse | null>(
-    null,
-  );
+  const [refreshResult, setRefreshResult] = useState<ApiResult | null>(null);
 
   const canSubmit = useMemo(() => {
     return email.trim().length > 0 && password.length > 0 && !isSubmitting;
@@ -29,7 +32,7 @@ export default function LoginForm() {
     if (!canSubmit) return;
 
     setIsSubmitting(true);
-    setResult(null);
+    setLoginResult(null);
     setIsLoggedIn(false);
     setRefreshResult(null);
     try {
@@ -44,15 +47,14 @@ export default function LoginForm() {
       });
 
       const data: unknown = await res.json().catch(() => null);
-
       if (res.ok) {
-        setResult({ ok: true, data });
+        setLoginResult({ ok: true, data });
         setIsLoggedIn(true);
       } else {
-        setResult({ ok: false, status: res.status, data });
+        setLoginResult({ ok: false, status: res.status, data });
       }
     } catch {
-      setResult({ ok: false, status: 0, data: { error: "NETWORK_ERROR" } });
+      setLoginResult({ ok: false, status: 0, data: { error: "NETWORK_ERROR" } });
     } finally {
       setIsSubmitting(false);
     }
@@ -145,23 +147,35 @@ export default function LoginForm() {
       </form>
 
       {isLoggedIn ? (
-        <button
-          type="button"
-          onClick={onRefresh}
-          disabled={isRefreshing}
-          className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-black dark:text-zinc-100 dark:hover:bg-zinc-950"
-        >
-          {isRefreshing ? "Đang refresh..." : "Refresh token"}
-        </button>
+        <div className="mt-4 space-y-3">
+          <button
+            type="button"
+            onClick={() => window.location.assign(GOOGLE_CONNECT_URL)}
+            className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+          >
+            Connect Gmail
+          </button>
+
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-black dark:text-zinc-100 dark:hover:bg-zinc-950"
+          >
+            {isRefreshing ? "Đang refresh..." : "Refresh token"}
+          </button>
+        </div>
       ) : null}
 
-      {result ? (
+      {loginResult ? (
         <div className="mt-5 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200">
           <div className="mb-2 font-medium">
-            {result.ok ? "Thành công" : `Thất bại (HTTP ${result.status})`}
+            {loginResult.ok
+              ? "Đăng nhập thành công"
+              : `Đăng nhập thất bại (HTTP ${loginResult.status})`}
           </div>
           <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-words">
-            {JSON.stringify(result.data, null, 2)}
+            {JSON.stringify(loginResult.data, null, 2)}
           </pre>
         </div>
       ) : null}
@@ -181,3 +195,4 @@ export default function LoginForm() {
     </div>
   );
 }
+
