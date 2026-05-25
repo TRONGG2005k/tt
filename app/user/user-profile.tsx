@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import { TT_API_BASE_URL } from "@/app/lib/tt-api";
-
 type UserMe = {
   id: string;
   email: string;
@@ -18,7 +16,7 @@ type LoadState =
   | { status: "loaded"; user: UserMe }
   | { status: "error"; message: string; details?: unknown };
 
-const ME_URL = `${TT_API_BASE_URL}/api/v1/users/me`;
+const ME_URL = `/api/v1/users/me`;
 
 export default function UserProfile() {
   const [state, setState] = useState<LoadState>({ status: "idle" });
