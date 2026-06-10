@@ -76,12 +76,12 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="w-full rounded-[2rem] border border-white/80 bg-white/90 p-6 shadow-2xl shadow-slate-200/80 backdrop-blur sm:p-8">
+    <div className="w-full max-w-md">
       <div className="mb-8">
-        <div className="inline-flex rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+        <div className="inline-flex rounded-full bg-[#e3e9ff] px-3 py-1 font-mono text-xs font-medium text-[#0b4dcc]">
           Welcome back
         </div>
-        <h1 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950">
+        <h1 className="mt-5 text-3xl font-bold tracking-tight text-[#0b1328]">
           Sign in to your workspace
         </h1>
         <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -91,7 +91,7 @@ export default function LoginForm() {
 
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium text-slate-800">
+          <label htmlFor="email" className="text-sm font-semibold text-slate-800">
             Email
           </label>
           <input
@@ -102,13 +102,13 @@ export default function LoginForm() {
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+            className="h-12 w-full rounded-lg border border-[#d8deee] bg-[#fafbff] px-4 text-sm text-slate-900 outline-none transition focus:border-[#0b4dcc] focus:bg-white focus:ring-4 focus:ring-[#dce6ff]"
             placeholder="name@company.com"
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium text-slate-800">
+          <label htmlFor="password" className="text-sm font-semibold text-slate-800">
             Password
           </label>
           <input
@@ -119,13 +119,13 @@ export default function LoginForm() {
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+            className="h-12 w-full rounded-lg border border-[#d8deee] bg-[#fafbff] px-4 text-sm text-slate-900 outline-none transition focus:border-[#0b4dcc] focus:bg-white focus:ring-4 focus:ring-[#dce6ff]"
             placeholder="Enter your password"
           />
         </div>
 
         {errorMessage ? (
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
             {errorMessage}
           </div>
         ) : null}
@@ -133,13 +133,13 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={!canSubmit}
-          className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-sky-600 to-indigo-600 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:from-sky-500 hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex h-12 w-full items-center justify-center rounded-lg bg-[#0b4dcc] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#083fa8] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? "Signing in..." : "Sign in"}
         </button>
       </form>
 
-      <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+      <div className="mt-6 rounded-lg border border-[#dfe4f2] bg-[#f7f8fd] px-4 py-3 text-xs leading-5 text-slate-600">
         Access token is stored in local storage. Refresh token stays in the
         backend cookie and is rotated automatically when needed.
       </div>
