@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 
+import apiClient from "@/lib/api-client";
+import { getAccessToken } from "@/lib/auth-token";
+
 type UserMe = {
   id: string;
   email: string;
@@ -11,12 +14,16 @@ type UserMe = {
   offline_minutes: number | null;
 };
 
+type MeApiResponse = {
+  success: boolean;
+  message: string;
+  data: UserMe;
+};
+
 type LoadState =
   | { status: "idle" | "loading" }
   | { status: "loaded"; user: UserMe }
   | { status: "error"; message: string; details?: unknown };
-
-const ME_URL = `/api/v1/users/me`;
 
 export default function UserProfile() {
   const [state, setState] = useState<LoadState>({ status: "idle" });
@@ -25,32 +32,44 @@ export default function UserProfile() {
     let cancelled = false;
 
     async function run() {
+      if (!getAccessToken()) {
+        window.location.assign("/login");
+        return;
+      }
+
       setState({ status: "loading" });
       try {
-        const res = await fetch(ME_URL, {
-          method: "GET",
-          headers: {
-            accept: "application/json",
-          },
-          credentials: "include",
+        if (cancelled) return;
+        const response = await apiClient.get<MeApiResponse>("/users/me");
+        setState({ status: "loaded", user: response.data.data });
+      } catch (error: unknown) {
+        if (cancelled) return;
+        const status =
+          typeof error === "object" &&
+          error !== null &&
+          "response" in error &&
+          typeof error.response === "object" &&
+          error.response !== null &&
+          "status" in error.response &&
+          typeof error.response.status === "number"
+            ? error.response.status
+            : 0;
+
+        const details =
+          typeof error === "object" &&
+          error !== null &&
+          "response" in error &&
+          typeof error.response === "object" &&
+          error.response !== null &&
+          "data" in error.response
+            ? error.response.data
+            : undefined;
+
+        setState({
+          status: "error",
+          message: status ? `Request failed (HTTP ${status})` : "Network error",
+          details,
         });
-
-        const data: unknown = await res.json().catch(() => null);
-        if (!res.ok) {
-          if (cancelled) return;
-          setState({
-            status: "error",
-            message: `Request failed (HTTP ${res.status})`,
-            details: data,
-          });
-          return;
-        }
-
-        if (cancelled) return;
-        setState({ status: "loaded", user: data as UserMe });
-      } catch {
-        if (cancelled) return;
-        setState({ status: "error", message: "Network error" });
       }
     }
 
